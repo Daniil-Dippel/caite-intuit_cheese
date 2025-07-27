@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>О нас</title>
+  <link rel="stylesheet" href="./index.css">
+  <link rel="stylesheet" href="./we.css">
+  <style>
+    /* Скелет загрузки для карточек достижений */
+    .achievements-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .achievement {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .achievement-image {
+      background-size: cover;
+      background-position: center;
+      height: 160px;
+    }
+
+    .achievement-text {
+      padding: 1rem;
+    }
+
+    .achievement-text h3 {
+      margin-bottom: .5rem;
+      font-size: 1.2rem;
+    }
+
+    .achievement-text p {
+      font-size: .95rem;
+      color: #555;
+    }
+
+    /* Скелет стиль */
+    .achievement-skeleton {
+      background: #318e7e72;
+      border-radius: 12px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: inset 0 0 6px rgba(0, 255, 255, 0.4);
+      padding: 1rem;
+      min-height: 220px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .achievement-skeleton::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(120deg,
+          rgba(0, 255, 255, 0) 0%, rgba(0, 255, 255, 0.3) 50%, rgba(0, 255, 255, 0) 100%);
+      animation: neonShimmer 1.8s infinite;
+    }
+
+    @keyframes neonShimmer {
+      0% {
+        transform: translateX(-100%);
+      }
+
+      100% {
+        transform: translateX(100%);
+      }
+    }
+
+    .skeleton-block {
+      background: #71c1d595;
+      border-radius: 4px;
+      flex: 1;
+      margin-bottom: .8rem;
+    }
+
+    .skeleton-line {
+      height: 16px;
+      background: #1a7b7e83;
+      border-radius: 4px;
+      margin-bottom: .6rem;
+    }
+
+    .skeleton-line.short {
+      width: 60%;
+    }
+  </style>
+</head>
+
+<body>
+  <header class="header">
+    <div class="container">
+      <div class="left">
+        <nav class="nav" id="nav">
+          <ul class="nav__list">
+            <li><a href="./index.html">Главная</a></li>
+            <li><a href="./stor.html">Оборудование</a></li>
+            <li><a href="./felis.html">Чат с ИИ</a></li>
+            <li><a href="./We.html">О нас</a></li>
+          </ul>
+        </nav>
+      </div>
+      <div class="center">
+        <div class="logo">
+          <img src="./img/logo.jpg" alt="Логотип">
+        </div>
+      </div>
+      <div class="right">
+        <div class="contact">
+          <div class="xtv">
+            <a href="tel:+996705888002" class="phone">+996 (705) 888 002</a>
+            <a href="tel:+996705888002" class="phone">+996 (705) 888 002</a>
+          </div>
+          <a href="./zaivka.html"><button class="btn">Оставить заявку</button></a>
+        </div>
+        <div class="burger" id="burger"><span></span><span></span><span></span></div>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero"></section>
+  <section class="achievements">
+    <h2>Наши достижения</h2>
+    <div id="achievements-container" class="achievements-list"></div>
+  </section>
+
+  <footer class="footer">
+    <div class="footer__container">
+      <!-- Соцсети и навигация, контакты как в оригинале -->
+    </div>
+  </footer>
+
+  <script>
+    // Бургер
+    const burger = document.getElementById('burger');
+    const nav = document.getElementById('nav');
+    burger.addEventListener('click', () => {
+      burger.classList.toggle('active'); nav.classList.toggle('active');
+    });
+
+    const container = document.getElementById('achievements-container');
+
+    // Показываем скелет перед загрузкой
+    function showAchievementsSkeleton(count = 6) {
+      container.innerHTML = '';
+      for (let i = 0; i < count; i++) {
+        const sk = document.createElement('div');
+        sk.className = 'achievement-skeleton';
+        sk.innerHTML = `
+          <div class="skeleton-block"></div>
+          <div class="skeleton-line"></div>
+          <div class="skeleton-line short"></div>
+        `;
+        container.appendChild(sk);
+      }
+    }
+
+    // Загрузка и рендер достижений
+    async function loadAchievements() {
+      showAchievementsSkeleton();
+      try {
+        const res = await fetch('http://127.0.0.1:5000/api/catalog');
+        if (!res.ok) throw new Error(res.status);
+        const data = await res.json();
+        const items = Array.isArray(data) && data[0]?.we ? data[0].we : [];
+        renderAchievements(items);
+      } catch (err) {
+        console.error('Ошибка загрузки:', err);
+        container.innerHTML = '<p>Не удалось загрузить информацию.</p>';
+      }
+    }
+
+    function renderAchievements(data) {
+      container.innerHTML = '';
+      if (!data.length) {
+        container.innerHTML = '<p>Нет достижений для отображения.</p>';
+        return;
+      }
+      data.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'achievement';
+        card.innerHTML = `
+          <div class="achievement-image" style="background-image:url(${item.image})"></div>
+          <div class="achievement-text">
+            <h3>${item.title}</h3>
+            <p>${item.text}</p>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    // Запуск
+    loadAchievements();
+  </script>
+</body>
+
+</html>

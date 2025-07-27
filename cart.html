@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Корзина</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(to bottom, #eafffa, #ffffff);
+            color: #222;
+        }
+
+        .main-content {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            font-size: 2.2rem;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 700;
+            color: #222;
+        }
+
+        h2::before {
+            content: '🛒';
+            font-size: 1.8rem;
+        }
+
+        #cart-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .item {
+            background: white;
+            border-radius: 20px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: transform 0.3s;
+        }
+
+        .item:hover {
+            transform: translateY(-5px);
+        }
+
+        .item img {
+            width: 100%;
+            height: 180px;
+            object-fit: contain;
+            margin-bottom: 1rem;
+            border-radius: 10px;
+            background: #f4f4f4;
+        }
+
+        .item p {
+            margin: 0.4rem 0;
+            line-height: 1.5;
+            font-size: 0.95rem;
+            text-align: center;
+        }
+
+        .item strong {
+            font-weight: 600;
+        }
+
+        .quantity {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 0.7rem 0;
+        }
+
+        .quantity button {
+            padding: 0.4rem 0.9rem;
+            font-size: 1.2rem;
+            background: #1dd7aa;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .quantity button:hover {
+            background: #12b692;
+        }
+
+        .item .remove {
+            margin-top: 1rem;
+            background: #ff5e5e;
+            color: white;
+            padding: 0.5rem 1.2rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        .item .remove:hover {
+            background: #d64444;
+        }
+
+        #total {
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        .actions {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .actions button {
+            padding: 0.8rem 1.6rem;
+            background: #1dd7aa;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            color: white;
+            transition: background 0.3s;
+        }
+
+        .actions button:hover {
+            background: #12b692;
+        }
+
+        #toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1dd7aa;
+            color: #fff;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 999;
+        }
+
+        #toast.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+    </style>
+    <link rel="stylesheet" href="./index.css">
+</head>
+
+<body>
+
+    <header class="header">
+        <div class="container">
+            <div class="left">
+                <nav class="nav" id="nav">
+                    <ul class="nav__list">
+                        <li><a href="./index.html">Главная</a></li>
+                        <li><a href="./stor.html">Оборудование</a></li>
+                        <li><a href="./felis.html">Чат с ИИ</a></li>
+                        <li><a href="./We.html">О нас</a></li>
+                    </ul>
+                </nav>
+            </div>
+
+            <div class="center">
+                <div class="logo">
+                    <img src="./img/logo.jpg" alt="Логотип">
+                </div>
+            </div>
+
+            <div class="right">
+                <div class="contact">
+                    <div class="xtv">
+                        <a href="tel:+996705888002" class="phone">+996 (705) 888 002</a>
+                        <a href="tel:+996705888002" class="phone">+996 (705) 888 002</a>
+                    </div>
+                    <a href="./zaivka.html"><button class="btn">Оставить заявку</button></a>
+                </div>
+                <div class="burger" id="burger">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </div>
+    </header>
+    <section class="hero"></section>
+    <main class="main-content">
+        <h2>Ваша корзина</h2>
+        <div id="cart-items"></div>
+        <div id="total"></div>
+        <div class="actions">
+            <button onclick="checkout()">Купить</button>
+            <button onclick="location.href='stor.html'">⬅ В магазин</button>
+        </div>
+    </main>
+
+    <div id="toast"></div>
+    <footer class="footer">
+        <div class="footer__container">
+            <!-- Соцсети -->
+            <div class="footer__section section-logo">
+                <p class="footer__text">Мы в социальных сетях:</p>
+                <br>
+                <div class="footer__socials">
+                    <a href="https://www.instagram.com/caite.intuit?igsh=MTFpMHU5NHpzZzkyZg==" target="_blank">
+                        <img src="./img/in.jpg" alt="Instagram" />
+                    </a>
+                    <a href="https://wa.me/996707123123" target="_blank">
+                        <img src="./img/ws.jpg" alt="WhatsApp" />
+                    </a>
+                    <a href="https://t.me/your_channel" target="_blank">
+                        <img src="./img/tg.jpg" alt="Telegram" />
+                    </a>
+                </div>
+                <div class="re">
+                    <p class="footer__copyright"><br>© 2025 CAITEINTUIT </p>
+                </div>
+            </div>
+
+            <!-- Навигация -->
+            <div class="footer__section">
+                <h4>Навигация</h4>
+                <ul>
+                    <li><a href="./index.html">Главная</a></li>
+                    <li><a href="./We.html">О нас</a></li>
+                    <li><a href="./stor.html">Оборудование</a></li>
+                    <li><a href="./felis.html">Чат с ИИ</a></li>
+                </ul>
+            </div>
+
+            <!-- Контакты -->
+            <div class="footer__section">
+                <h4>Контакты</h4>
+                <p><img src="./img/em.jpg" alt="email" class="icon" />
+                    <a href="mailto:caitointuit@gmail.com">caitointuit@gmail.com</a>
+                </p>
+                <p><img src="./img/tel.jpg" alt="phone" class="icon" />
+                    <a href="tel:+996707123123">+996 707 123 123</a>
+                </p>
+                <p><img src="./img/adre.jpg" alt="location" class="icon" />
+                    Адрес: г. Бишкек, ул. Виноградная, 1/17
+                </p>
+            </div>
+        </div>
+    </footer>
+    <script>
+        const burger = document.getElementById('burger');
+        const nav = document.getElementById('nav');
+
+        burger.addEventListener('click', () => {
+            burger.classList.toggle('active');
+            nav.classList.toggle('active');
+        });
+
+        let cart = JSON.parse(localStorage.getItem('cart') || '[]');
+        const itemsEl = document.getElementById("cart-items");
+        const totalEl = document.getElementById("total");
+        const toastEl = document.getElementById("toast");
+
+        function renderCart() {
+            itemsEl.innerHTML = '';
+            let total = 0;
+
+            if (cart.length === 0) {
+                itemsEl.innerHTML = `
+        <div style="text-align:center; width:100%;">
+          <img src="https://i.imgur.com/I0eN9dF.gif" alt="Пустая корзина" style="max-width:280px; width:100%; margin:0 auto; display:block;" />
+          <p style="margin-top: 1rem; font-size: 1.2rem;">Ваша корзина пуста 😢</p>
+        </div>
+      `;
+                totalEl.textContent = "";
+                return;
+            }
+
+            cart.forEach((item, index) => {
+                const itemTotal = item.price * item.count;
+                total += itemTotal;
+
+                const div = document.createElement('div');
+                div.className = 'item';
+                div.innerHTML = `
+        <img src="${item.img}" alt="${item.name}">
+        <p><strong>${item.name}</strong></p>
+        <p><strong>Цена:</strong> ${item.price} сом</p>
+        ${item.age ? `<p><strong>Возраст:</strong> ${item.age}</p>` : ""}
+        ${item.system ? `<p><strong>Характеристики:</strong> ${item.system}</p>` : ""}
+        ${item.img2 ? `` : ""}
+        <div class="quantity">
+          <button onclick="changeCount(${index}, -1)">−</button>
+          <strong>${item.count}</strong>
+          <button onclick="changeCount(${index}, 1)">+</button>
+        </div>
+        <p><strong>Итого:</strong> ${itemTotal} сом</p>
+        <button class="remove" onclick="removeItem(${index})">Удалить</button>
+      `;
+                itemsEl.appendChild(div);
+            });
+
+            totalEl.textContent = "Общая сумма: " + total + " сом";
+        }
+
+        function changeCount(index, delta) {
+            cart[index].count += delta;
+            if (cart[index].count <= 0) cart.splice(index, 1);
+            localStorage.setItem('cart', JSON.stringify(cart));
+            renderCart();
+        }
+
+        function removeItem(index) {
+            cart.splice(index, 1);
+            localStorage.setItem('cart', JSON.stringify(cart));
+            renderCart();
+        }
+
+        function checkout() {
+            if (cart.length === 0) {
+                showToast("Корзина пуста");
+                return;
+            }
+            const total = cart.reduce((sum, item) => sum + item.price * item.count, 0);
+            showToast("Покупка на " + total + " сом оформлена!");
+            localStorage.removeItem('cart');
+            cart = [];
+            renderCart();
+        }
+
+        function showToast(message) {
+            toastEl.textContent = message;
+            toastEl.classList.add("show");
+            setTimeout(() => {
+                toastEl.classList.remove("show");
+            }, 2500);
+        }
+
+        renderCart();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Оставить заявку</title>
+    <link rel="stylesheet" href="./index.css" />
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(to bottom, #c7fff4, #ffffff);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            align-items: center;
+        }
+
+        header {
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: 1400px;
+        }
+
+        main {
+            flex: 1;
+            padding: 2rem;
+            width: 100%;
+            max-width: 800px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            font-size: 2rem;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        input,
+        textarea,
+        select {
+            padding: 0.75rem;
+            border: 2px solid #c0fff2;
+            border-radius: 12px;
+            font-size: 1rem;
+            width: 100%;
+            outline: none;
+        }
+
+        input:focus,
+        textarea:focus {
+            border-color: #7dffe1;
+            box-shadow: 0 0 6px #7dffe1aa;
+        }
+
+        button {
+            background-color: #7dffe1;
+            border: none;
+            padding: 0.9rem;
+            border-radius: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #5ff5d1;
+        }
+
+        .success-message {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 12px;
+            background: #d1ffe9;
+            text-align: center;
+            font-weight: 600;
+            color: #057857;
+            display: none;
+        }
+
+        .error-message {
+            color: #d93025;
+            font-weight: 600;
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        footer {
+            text-align: center;
+            font-size: 0.9rem;
+            padding: 1rem;
+            margin-top: auto;
+            background-color: transparent;
+            width: 100%;
+        }
+
+        @media (max-width: 800px) {
+            main {
+                margin: 1rem;
+                padding: 1rem;
+                width: 80%;
+            }
+        }
+
+        @media (min-width: 1200px) {
+            main {
+                max-width: 1000px;
+                padding: 3rem;
+            }
+
+            h1 {
+                font-size: 2.3rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <a href="./index.html" class="logo">
+            <img src="./img/logo.jpg" alt="Логотип" />
+        </a>
+        <div class="xtv">
+            <a href="tel:+996705888002" class="phone">+996 (705) 888 002</a>
+            <a href="tel:+996705888002" class="phone">+996 (705) 888 002</a>
+        </div>
+    </header>
+
+    <main>
+        <h1>Оставить заявку</h1>
+        <form id="request-form" novalidate>
+            <label for="name">Ваша организация</label>
+            <input type="text" id="name" name="name" required />
+
+            <label for="phone">Телефон</label>
+            <input type="tel" id="phone" name="phone" required placeholder="+996" />
+
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" />
+            <div class="error-message" id="email-error">Пожалуйста, введите корректный Email.</div>
+
+            <label for="entity">Вы юридическое лицо?</label>
+            <select id="entity" name="entity" required>
+                <option value="">-- Выберите --</option>
+                <option value="yes">Да, юридическое лицо</option>
+                <option value="no">Нет, физическое лицо</option>
+            </select>
+            <div class="error-message" id="entity-error">Отправка доступна только для юридических лиц.</div>
+
+            <label for="message">Комментарий</label>
+            <textarea id="message" name="message" rows="4" placeholder="Что вас интересует?"></textarea>
+            <div class="error-message" id="message-error">Это поле обязательно для заполнения.</div>
+
+            <button type="submit">Отправить заявку</button>
+            <div class="success-message" id="success-msg">Заявка успешно отправлена!</div>
+            <div class="error-message" id="limit-error"></div>
+        </form>
+    </main>
+
+    <footer>
+        © 2025 CAITE INTUIT — Будущее начинается сегодня
+    </footer>
+
+    <script>
+        const form = document.getElementById('request-form');
+        const successMsg = document.getElementById('success-msg');
+        const entitySelect = document.getElementById('entity');
+        const entityError = document.getElementById('entity-error');
+        const limitError = document.getElementById('limit-error');
+        const emailInput = document.getElementById('email');
+        const messageInput = document.getElementById('message');
+        const emailError = document.getElementById('email-error');
+        const messageError = document.getElementById('message-error');
+
+        // Таймаут между отправками (30 секунд)
+        const SUBMIT_TIMEOUT_MS = 30000;
+
+        // Максимум заявок в день
+        const MAX_REQUESTS_PER_DAY = 2;
+
+        // Ключ для localStorage
+        const STORAGE_KEY = 'dailyRequestTimestamps';
+
+        // Получить время начала сегодняшнего дня (00:00:00)
+        function getStartOfToday() {
+            const now = new Date();
+            return new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+        }
+
+        // Время последней отправки для таймаута
+        let lastSubmitTime = 0;
+
+        // Простая проверка email
+        function validateEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email.toLowerCase());
+        }
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Сброс ошибок
+            entityError.style.display = 'none';
+            limitError.style.display = 'none';
+            emailError.style.display = 'none';
+            messageError.style.display = 'none';
+
+            // Проверка юридического лица
+            if (entitySelect.value !== 'yes') {
+                entityError.style.display = 'block';
+                return;
+            }
+
+            // Проверка email
+            const emailValue = emailInput.value.trim();
+            if (!emailValue || !validateEmail(emailValue)) {
+                emailError.style.display = 'block';
+                return;
+            }
+
+            // Проверка комментария
+            const messageValue = messageInput.value.trim();
+            if (!messageValue) {
+                messageError.style.display = 'block';
+                return;
+            }
+
+            // Проверка таймаута
+            const now = Date.now();
+            if (now - lastSubmitTime < SUBMIT_TIMEOUT_MS) {
+                alert(`Пожалуйста, подождите ${Math.ceil((SUBMIT_TIMEOUT_MS - (now - lastSubmitTime)) / 1000)} секунд перед повторной отправкой.`);
+                return;
+            }
+
+            // Проверка лимита заявок за сегодня
+            let timestamps = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            const startOfToday = getStartOfToday();
+
+            // Оставляем только сегодняшние отметки
+            timestamps = timestamps.filter(ts => ts >= startOfToday);
+
+            if (timestamps.length >= MAX_REQUESTS_PER_DAY) {
+                limitError.textContent = `За сегодня вы уже отправили ${MAX_REQUESTS_PER_DAY} заявки. Попробуйте завтра.`;
+                limitError.style.display = 'block';
+                return;
+            }
+
+            // Формируем данные для отправки
+            const payload = {
+                name: document.getElementById('name').value.trim(),
+                phone: document.getElementById('phone').value.trim(),
+                email: emailValue,
+                entity: entitySelect.value,
+                message: messageValue,
+            };
+
+            try {
+                const response = await fetch('http://127.0.0.1:5000/api/request', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.status === 'success') {
+                    successMsg.style.display = 'block';
+                    form.reset();
+                    lastSubmitTime = Date.now();
+
+                    timestamps.push(Date.now());
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(timestamps));
+
+                    setTimeout(() => {
+                        successMsg.style.display = 'none';
+                    }, 3000);
+                } else {
+                    alert('Ошибка: ' + (result.message || 'Попробуйте ещё раз.'));
+                }
+            } catch (err) {
+                console.error('Ошибка при отправке заявки:', err);
+                alert('Ошибка сервера. Попробуйте позже.');
+            }
+        });
+    </script>
+
+</body>
+
+</html>

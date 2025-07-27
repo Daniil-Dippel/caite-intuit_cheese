@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Магазин</title>
+    <link rel="stylesheet" href="./index.css">
+    <style>
+        /* общий стиль */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f9f9f9;
+            color: #333;
+        }
+
+        .main-content {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .top-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        #search,
+        #category-select {
+            padding: .7rem 1rem;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            flex: 1;
+            max-width: 300px;
+        }
+
+        .products {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .product {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            padding: 1rem;
+            text-align: center;
+            transition: transform .3s;
+            cursor: pointer;
+        }
+
+        .product:hover {
+            transform: translateY(-5px);
+        }
+
+        .product img {
+            width: 100%;
+            height: 150px;
+            object-fit: contain;
+            margin-bottom: 1rem;
+        }
+
+        .product button {
+            margin-top: .5rem;
+            background: #7DFFE1;
+            border: none;
+            padding: .5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background .3s;
+        }
+
+        .product button:hover {
+            background: #5df0cf;
+        }
+
+        /* скелет загрузки в стиле робототехники (обновлён) */
+        .skeleton {
+            background: #1d918d66;
+            /* менее чёрный фон */
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 0 6px rgba(0, 255, 255, 0.4);
+        }
+
+        .skeleton::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(120deg,
+                    rgba(0, 255, 255, 0) 0%,
+                    rgba(0, 255, 255, 0.3) 50%,
+                    rgba(0, 255, 255, 0) 100%);
+            animation: neonShimmer 1.8s infinite;
+        }
+
+        @keyframes neonShimmer {
+            0% {
+                transform: translateX(-100%);
+            }
+
+            100% {
+                transform: translateX(100%);
+            }
+        }
+
+        .skeleton-img {
+            width: 100%;
+            height: 150px;
+            margin-bottom: 1rem;
+        }
+
+        .skeleton-text {
+            width: 80%;
+            height: 16px;
+            margin: 0 auto .5rem;
+        }
+
+        .skeleton-text.short {
+            width: 60%;
+        }
+
+        .skeleton-button {
+            width: 50%;
+            height: 32px;
+            margin: .5rem auto 0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        .hero {
+            padding: 60px 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #ffffff;
+            color: #333;
+        }
+
+        .main-content {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .top-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        #search,
+        #category-select {
+            padding: 0.7rem 1rem;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            flex: 1;
+            max-width: 300px;
+        }
+
+        .products {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .product {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            padding: 1rem;
+            text-align: center;
+            transition: transform 0.3s;
+            position: relative;
+        }
+
+        .product:hover {
+            transform: translateY(-5px);
+        }
+
+        .product img {
+            width: 100%;
+            height: 150px;
+            object-fit: contain;
+            margin-bottom: 1rem;
+        }
+
+        .product button {
+            margin-top: 0.5rem;
+            background: #7DFFE1;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        .product button:hover {
+            background: #5df0cf;
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            max-width: 600px;
+            width: 90%;
+            padding: 2rem;
+            border-radius: 12px;
+            position: relative;
+            overflow-y: auto;
+            max-height: 90vh;
+        }
+
+        .modal-content h2 {
+            margin-bottom: 1rem;
+        }
+
+        .modal-content img {
+            width: 100%;
+            max-height: 250px;
+            object-fit: contain;
+            margin-bottom: 1rem;
+        }
+
+        .modal-content p {
+            margin-bottom: 0.8rem;
+        }
+
+        .modal-content button {
+            background: #7DFFE1;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 1rem;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        #toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #7DFFE1;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 1000;
+        }
+
+        #toast.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        #cart-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #7DFFE1;
+            border: none;
+            padding: 0.7rem 1.2rem;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            z-index: 1001;
+        }
+
+        #cart-count {
+            background: red;
+            color: white;
+            font-size: 0.8rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 50%;
+            position: absolute;
+            top: -5px;
+            right: -5px;
+        }
+
+        @media (max-width: 480px) {
+            #cart-button {
+                padding: 0.5rem 1rem;
+            }
+
+            .product img {
+                height: 120px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="left">
+                <nav class="nav" id="nav">
+                    <ul class="nav__list">
+                        <li><a href="./index.html">Главная</a></li>
+                        <li><a href="./stor.html">Оборудование</a></li>
+                        <li><a href="./felis.html">Чат с ИИ</a></li>
+                        <li><a href="./We.html">О нас</a></li>
+                    </ul>
+                </nav>
+            </div>
+
+            <div class="center">
+                <div class="logo">
+                    <img src="./img/logo.jpg" alt="Логотип">
+                </div>
+            </div>
+
+            <div class="right">
+                <div class="contact">
+                    <div class="xtv">
+                        <a href="tel:+996705888002" class="phone">+996 (705) 888 002</a>
+                        <a href="tel:+996705888002" class="phone">+996 (705) 888 002</a>
+                    </div>
+                    <a href="./zaivka.html"><button class="btn">Оставить заявку</button></a>
+                </div>
+                <div class="burger" id="burger">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </div>
+    </header>
+    <section class="hero"></section>
+    <!-- <a href="./cart.html">
+        <button id="cart-button">
+            🛒 <span id="cart-count">0</span>
+        </button>
+    </a> -->
+    <main class="main-content">
+        <div class="top-bar">
+            <input type="text" id="search" placeholder="Поиск..." />
+            <select id="category-select"></select>
+        </div>
+
+        <div class="products" id="product-list"></div>
+    </main>
+    <div class="products" id="product-list">
+        <!-- Скелет до загрузки -->
+    </div>
+    <div class="modal" id="modal">
+        <div class="modal-content" id="modal-content">
+            <button class="modal-close" onclick="closeModal()">×</button>
+        </div>
+    </div>
+
+    <div id="toast"></div>
+    <footer class="footer">
+        <div class="footer__container">
+            <!-- Соцсети -->
+            <div class="footer__section section-logo">
+                <p class="footer__text">Мы в социальных сетях:</p>
+                <br>
+                <div class="footer__socials">
+                    <a href="https://www.instagram.com/caite.intuit?igsh=MTFpMHU5NHpzZzkyZg==" target="_blank">
+                        <img src="./img/in.jpg" alt="Instagram" />
+                    </a>
+                    <a href="https://wa.me/996707123123" target="_blank">
+                        <img src="./img/ws.jpg" alt="WhatsApp" />
+                    </a>
+                    <a href="https://t.me/your_channel" target="_blank">
+                        <img src="./img/tg.jpg" alt="Telegram" />
+                    </a>
+                </div>
+                <div class="re">
+                    <p class="footer__copyright"><br>© 2025 CAITEINTUIT </p>
+                </div>
+            </div>
+
+            <!-- Навигация -->
+            <div class="footer__section">
+                <h4>Навигация</h4>
+                <ul>
+                    <li><a href="./index.html">Главная</a></li>
+                    <li><a href="./We.html">О нас</a></li>
+                    <li><a href="./stor.html">Оборудование</a></li>
+                    <li><a href="./felis.html">Чат с ИИ</a></li>
+                </ul>
+            </div>
+
+            <!-- Контакты -->
+            <div class="footer__section">
+                <h4>Контакты</h4>
+                <p><img src="./img/em.jpg" alt="email" class="icon" />
+                    <a href="mailto:caitointuit@gmail.com">caitointuit@gmail.com</a>
+                </p>
+                <p><img src="./img/tel.jpg" alt="phone" class="icon" />
+                    <a href="tel:+996707123123">+996 707 123 123</a>
+                </p>
+                <p><img src="./img/adre.jpg" alt="location" class="icon" />
+                    Адрес: г. Бишкек, ул. Виноградная, 1/17
+                </p>
+            </div>
+        </div>
+    </footer>
+    <script>
+        // селекторы и состояние
+        const elements = {
+            burger: document.getElementById('burger'),
+            nav: document.getElementById('nav'),
+            search: document.getElementById('search'),
+            category: document.getElementById('category-select'),
+            productList: document.getElementById('product-list'),
+            modal: document.getElementById('modal'),
+            modalContent: document.getElementById('modal-content')
+        };
+        const state = { products: [], currentCategory: 'Все' };
+
+        // переключение навигации
+        elements.burger.addEventListener('click', () => {
+            elements.burger.classList.toggle('active');
+            elements.nav.classList.toggle('active');
+        });
+
+        // показ скелета
+        const showSkeleton = (count = 6) => {
+            elements.productList.innerHTML = '';
+            for (let i = 0; i < count; i++) {
+                const card = document.createElement('div');
+                card.className = 'product';
+                card.innerHTML = `
+                    <div class="skeleton skeleton-img"></div>
+                    <div class="skeleton skeleton-text"></div>
+                    <div class="skeleton skeleton-text short"></div>
+                    <div class="skeleton skeleton-button"></div>
+                `;
+                elements.productList.appendChild(card);
+            }
+        };
+
+        // загрузка товаров
+        const fetchProducts = async () => {
+            showSkeleton();
+            try {
+                const res = await fetch('http://127.0.0.1:5000/api/catalog');
+                const data = await res.json();
+                state.products = Array.isArray(data) && data[0]?.tovar ? data[0].tovar : [];
+                populateCategories(); renderProducts();
+            } catch (e) {
+                elements.productList.innerHTML = '<p>Не удалось загрузить товары.</p>';
+            }
+        };
+
+        // заполнение категорий
+        const populateCategories = () => {
+            const cats = ['Все', ...new Set(state.products.map(p => p.categori))];
+            elements.category.innerHTML = cats.map(c => `<option>${c}</option>`).join('');
+        };
+
+        // рендеринг карточек
+        const renderProducts = () => {
+            const q = elements.search.value.toLowerCase();
+            elements.productList.innerHTML = '';
+            const filtered = state.products.filter(p =>
+                (state.currentCategory === 'Все' || p.categori === state.currentCategory) && p.name.toLowerCase().includes(q)
+            );
+            if (!filtered.length) return elements.productList.innerHTML = '<p>Ничего не найдено</p>';
+            filtered.forEach(p => {
+                const card = document.createElement('div'); card.className = 'product';
+                card.innerHTML = `
+                    <img src="${p.img}" alt="${p.name}">
+                    <strong>${p.name}</strong>
+                    <p>${p.price} сом</p>
+                    <button onclick="(openModal(${p.id}))">Подробнее</button>
+                `;
+                card.addEventListener('click', () => openModal(p));
+                elements.productList.appendChild(card);
+            });
+        };
+
+        // открытие модалки
+        const openModal = p => {
+            elements.modalContent.innerHTML = `
+                <button class="modal-close">×</button>
+                <h2>${p.name}</h2>
+                <img src="${p.img}" alt="${p.name}">
+                <p><strong>Цена:</strong> ${p.price} сом</p>
+                <p>${p.text || ''}</p>
+                ${p.age ? `<p><strong>Возраст:</strong> ${p.age}</p>` : ''}
+                ${p.system ? `<p><strong>Характеристики:</strong> ${p.system}</p>` : ''}
+                ${p.img2 ? `<p><strong>Комплектация:</strong><br><img src="${p.img2}" style="max-width:100%;margin-top:10px"></p>` : ''}
+            `;
+            elements.modal.classList.add('active');
+            elements.modalContent.querySelector('.modal-close').addEventListener('click', closeModal);
+        };
+
+        // закрытие модалки
+        const closeModal = () => elements.modal.classList.remove('active');
+
+        // события поиска и фильтрации
+        elements.search.addEventListener('input', renderProducts);
+        elements.category.addEventListener('change', e => {
+            state.currentCategory = e.target.value; renderProducts();
+        });
+
+        // инициализация
+        fetchProducts();
+    </script>
+</body>
+
+</html>
