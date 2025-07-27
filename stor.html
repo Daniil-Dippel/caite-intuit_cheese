@@ -484,7 +484,7 @@
         const fetchProducts = async () => {
             showSkeleton();
             try {
-                const res = await fetch('http://127.0.0.1:5000/api/catalog');
+                const res = await fetch('https://beck-4.onrender.com/api/catalog');
                 const data = await res.json();
                 state.products = Array.isArray(data) && data[0]?.tovar ? data[0].tovar : [];
                 populateCategories(); renderProducts();
